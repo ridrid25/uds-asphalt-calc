@@ -697,8 +697,11 @@ function loadCards(): CardInput[] {
       && Array.isArray(c.recipe) && typeof c.volume === 'number'
       && typeof c.basePrice === 'number' && typeof c.disc === 'number');
     if (!ok) return defaultCards();
+    // Свежий id для каждой карточки: счётчик uid() при перезагрузке начинается
+    // заново, поэтому переиспользование старых id могло бы столкнуться с id
+    // новых карточек (дубли ключей React). Пересоздаём — id эфемерны.
     return d.map((c: CardInput) => ({
-      id: c.id, name: c.name,
+      id: uid(), name: c.name,
       recipe: c.recipe.map((r) => [r[0], r[1]] as [MaterialKey, number]),
       refKey: c.refKey ?? null,
       volume: c.volume, basePrice: c.basePrice, disc: c.disc,
