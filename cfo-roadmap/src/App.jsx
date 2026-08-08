@@ -443,10 +443,12 @@ export default function App() {
           {Object.entries(CATEGORIES).map(([k, v]) => {
             const items = IMPROVEMENTS.filter(i => i.category === k);
             const doneCount = items.filter(i => done[i.id]).length;
+            const edge = `1px solid ${filter === k ? v.color + "88" : "#1A1A22"}`;
             return (
               <div key={k} onClick={() => setFilter(filter === k ? "all" : k)} style={{
-                background: "#0E0E14", border: `1px solid ${filter === k ? v.color + "88" : "#1A1A22"}`,
+                background: "#0E0E14",
                 borderTop: `2px solid ${v.color}`,
+                borderRight: edge, borderBottom: edge, borderLeft: edge,
                 padding: "12px 14px", borderRadius: 3, cursor: "pointer",
               }}>
                 <div style={{ fontSize: 18, marginBottom: 4 }}>{v.icon}</div>
@@ -533,13 +535,14 @@ export default function App() {
             const eff = EFFORTS[item.effort];
             const isDone = done[item.id];
             const isSel = selected === item.id;
+            const edge = `1px solid ${isSel ? cat.color + "88" : isDone ? "#1A2A1A" : "#1A1A22"}`;
 
             return (
               <div key={item.id}
                 onClick={() => setSelected(isSel ? null : item.id)}
                 style={{
                   background: isSel ? `${cat.color}0F` : isDone ? "#0D120D" : "#0E0E14",
-                  border: `1px solid ${isSel ? cat.color + "88" : isDone ? "#1A2A1A" : "#1A1A22"}`,
+                  borderTop: edge, borderRight: edge, borderBottom: edge,
                   borderLeft: `3px solid ${cat.color}`,
                   borderRadius: 3, padding: "16px",
                   cursor: "pointer", transition: "all 0.2s",
@@ -633,8 +636,10 @@ export default function App() {
           }}>
             <div style={{
               background: "#0A0A10",
-              border: `1px solid ${cat.color}55`,
               borderTop: `3px solid ${cat.color}`,
+              borderRight: `1px solid ${cat.color}55`,
+              borderBottom: `1px solid ${cat.color}55`,
+              borderLeft: `1px solid ${cat.color}55`,
               borderRadius: 4,
               overflow: "hidden",
             }}>
@@ -716,7 +721,9 @@ export default function App() {
       <div style={{ maxWidth: 1200, margin: "32px auto 0", padding: "0 16px" }}>
         <div style={{
           background: "linear-gradient(135deg, #0E1A0E 0%, #0A0A10 100%)",
-          border: "1px solid #85C88A33",
+          borderTop: "1px solid #85C88A33",
+          borderRight: "1px solid #85C88A33",
+          borderBottom: "1px solid #85C88A33",
           borderLeft: "3px solid #85C88A",
           borderRadius: 4, padding: "20px 24px",
         }}>
