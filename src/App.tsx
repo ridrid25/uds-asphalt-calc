@@ -22,11 +22,13 @@ type Role = 'mgr' | 'admin';
 
 const STORE_KEY = 'abc-data-v1';
 const THEME_KEY = 'abc-theme';
+const JOURNAL_KEY = 'abc-journal-v1';
+const CARDS_KEY = 'abc-cards-v1';
 
 export default function App() {
   const [settings, setSettings] = useState<GlobalSettings>(() => loadSettings());
-  const [cards, setCards] = useState<CardInput[]>(() => defaultCards());
-  const [journal, setJournal] = useState<JournalEntry[]>([]);
+  const [cards, setCards] = useState<CardInput[]>(() => loadCards());
+  const [journal, setJournal] = useState<JournalEntry[]>(() => loadJournal());
   const [role, setRole] = useState<Role>('mgr');
   const [dark, setDark] = useState<boolean>(() => initTheme());
 
@@ -45,6 +47,16 @@ export default function App() {
     else el.classList.remove('dark');
     try { localStorage.setItem(THEME_KEY, dark ? 'dark' : 'light'); } catch { /* noop */ }
   }, [dark]);
+
+  // ----- сохранение ассортимента марок в этом браузере -----
+  useEffect(() => {
+    try { localStorage.setItem(CARDS_KEY, JSON.stringify(cards)); } catch { /* noop */ }
+  }, [cards]);
+
+  // ----- сохранение журнала расчётов в этом браузере -----
+  useEffect(() => {
+    try { localStorage.setItem(JOURNAL_KEY, JSON.stringify(journal)); } catch { /* noop */ }
+  }, [journal]);
 
   // ----- тост авто-скрытие -----
   useEffect(() => {
@@ -671,6 +683,46 @@ function loadSettings(): GlobalSettings {
     if (d.target != null) s.target = d.target;
   } catch { /* noop */ }
   return s;
+}
+
+// Восстановить ассортимент марок из браузера; при отсутствии/сбое — заводской.
+function loadCards(): CardInput[] {
+  try {
+    const raw = localStorage.getItem(CARDS_KEY);
+    if (!raw) return defaultCards();
+    const d = JSON.parse(raw);
+    if (!Array.isArray(d)) return defaultCards();
+    const ok = d.every((c) =>
+      c && typeof c.id === 'string' && typeof c.name === 'string'
+      && Array.isArray(c.recipe) && typeof c.volume === 'number'
+      && typeof c.basePrice === 'number' && typeof c.disc === 'number');
+    if (!ok) return defaultCards();
+    // Свежий id для каждой карточки: счётчик uid() при перезагрузке начинается
+    // заново, поэтому переиспользование старых id могло бы столкнуться с id
+    // новых карточек (дубли ключей React). Пересоздаём — id эфемерны.
+    return d.map((c: CardInput) => ({
+      id: uid(), name: c.name,
+      recipe: c.recipe.map((r) => [r[0], r[1]] as [MaterialKey, number]),
+      refKey: c.refKey ?? null,
+      volume: c.volume, basePrice: c.basePrice, disc: c.disc,
+      collapsed: !!c.collapsed,
+    }));
+  } catch { /* noop */ }
+  return defaultCards();
+}
+
+// Восстановить журнал расчётов из браузера (ограничен тем же лимитом).
+function loadJournal(): JournalEntry[] {
+  try {
+    const raw = localStorage.getItem(JOURNAL_KEY);
+    if (!raw) return [];
+    const d = JSON.parse(raw);
+    if (!Array.isArray(d)) return [];
+    return d
+      .filter((e) => e && typeof e.id === 'string' && typeof e.name === 'string' && typeof e.margin === 'number')
+      .slice(0, JOURNAL_LIMIT);
+  } catch { /* noop */ }
+  return [];
 }
 
 function initTheme(): boolean {
