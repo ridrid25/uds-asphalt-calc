@@ -531,7 +531,6 @@ export default function App() {
           {filtered.map((item, idx) => {
             const cat = CATEGORIES[item.category];
             const eff = EFFORTS[item.effort];
-            const pri = PRIORITIES[item.priority];
             const isDone = done[item.id];
             const isSel = selected === item.id;
 
