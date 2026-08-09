@@ -1,0 +1,2 @@
+anthropic>=0.75
+python-telegram-bot>=20.0
